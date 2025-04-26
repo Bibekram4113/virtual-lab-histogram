@@ -1,0 +1,625 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Histogram Equalization Virtual Lab</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- AOS Animation Library -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.css" />
+    <style>
+        /* Basic Reset */
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: Arial, sans-serif; line-height: 1.6; }
+
+        /* Sidebar */
+        .sidebar {
+            position: fixed;
+            top: 0; left: 0;
+            width: 220px;
+            height: 100%;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            padding-top: 20px;
+            color: #fff;
+            overflow: auto;
+        }
+        .sidebar h2 {
+            text-align: center;
+            color: #fff;
+            margin-bottom: 20px;
+        }
+        .sidebar ul { list-style: none; padding-left: 0; }
+        .sidebar ul li { margin: 10px 0; }
+        .sidebar ul li a {
+            color: #f0f0f0;
+            text-decoration: none;
+            font-size: 18px;
+            display: block;
+            padding: 10px 20px;
+            transition: background 0.3s, color 0.3s;
+        }
+        .sidebar ul li a:hover {
+            background: rgba(255,255,255,0.1);
+        }
+        .sidebar ul li a.active {
+            background: rgba(255,255,255,0.2);
+            font-weight: bold;
+        }
+
+        /* Main content */
+        .content {
+            margin-left: 220px;
+            padding: 20px;
+        }
+        h1 {
+            margin-bottom: 20px;
+            text-align: center;
+            color: #333;
+        }
+        section {
+            padding: 20px;
+            margin-bottom: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        section h2 {
+            margin-bottom: 15px;
+            color: #444;
+        }
+        /* Section backgrounds */
+        #aim { background: #f0f8ff; }       /* AliceBlue */
+        #theory { background: #f9fbe7; }    /* Light lime */
+        #objective { background: #e0f7fa; } /* Light cyan */
+        #pretest { background: #fffde7; }   /* Light yellow */
+        #procedure { background: #f3e5f5; } /* Light lavender */
+        #simulation { background: #e8f5e9; }/* Light green */
+        #assignment { background: #fff3e0; }/* Light orange */
+        #posttest { background: #ede7f6; }  /* Light purple */
+        #references { background: #e3f2fd; }/* Light blue */
+        #feedback { background: #fbe9e7; }  /* Light coral */
+
+        /* Text and list styling */
+        p { margin-bottom: 15px; color: #333; }
+        ul, ol { margin-left: 20px !important; margin-bottom: 15px; }
+        li { margin-bottom: 5px; }
+
+        /* Simulation styles */
+        .sim-container {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-around;
+        }
+        .canvas-block {
+            margin: 10px;
+            text-align: center;
+        }
+        .canvas-block canvas {
+            border: 1px solid #888;
+            margin-top: 5px;
+        }
+
+        /* Smooth scroll */
+        html { scroll-behavior: smooth; }
+
+        /* Feedback form */
+        .feedback-form {
+            display: flex;
+            flex-direction: column;
+        }
+        .feedback-form label {
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        .feedback-form textarea {
+            resize: vertical;
+            padding: 8px;
+            margin-bottom: 10px;
+            font-size: 14px;
+        }
+        .feedback-form button {
+            width: 100px;
+            padding: 8px;
+            font-size: 16px;
+            background: #667eea;
+            border: none;
+            color: #fff;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .feedback-form button:hover {
+            background: #5563c1;
+        }
+    </style>
+</head>
+<body>
+    <!-- Sidebar navigation -->
+    <nav class="sidebar">
+        <h2>Histogram Lab</h2>
+        <ul>
+            <li><a href="#aim">Aim</a></li>
+            <li><a href="#theory">Theory</a></li>
+            <li><a href="#objective">Objective</a></li>
+            <li><a href="#pretest">Pretest</a></li>
+            <li><a href="#procedure">Procedure</a></li>
+            <li><a href="#simulation">Simulation</a></li>
+            <li><a href="#assignment">Assignment</a></li>
+            <li><a href="#posttest">Posttest Question</a></li>
+            <li><a href="#references">References</a></li>
+            <li><a href="#feedback">Share Feedback</a></li>
+        </ul>
+    </nav>
+
+    <!-- Main content -->
+    <div class="content">
+        <h1>Histogram Equalization Virtual Laboratory</h1>
+
+        <!-- Aim section -->
+        <section id="aim" data-aos="fade-up">
+            <h2>Aim</h2>
+            <p>The aim of this experiment is to understand the concept of histogram equalization and to apply it to digital images in order to enhance their contrast. By the end of this lab, you will learn how histogram equalization redistributes the intensity values of an image to utilize the full available intensity range.</p>
+            <p>Through interactive simulation, you will observe how images with poor contrast (either too dark or too bright) can be adjusted to have improved visibility and detail. The lab will demonstrate real-world benefits of histogram equalization, such as enhancing low-contrast medical X-ray images or adjusting photos taken in underexposed conditions.</p>
+        </section>
+
+        <!-- Theory section -->
+        <section id="theory" data-aos="fade-right">
+            <h2>Theory</h2>
+            <p>An image histogram is a graphical representation of the distribution of pixel intensity values in a digital image. The x-axis represents the intensity levels (for example, 0 = black up to 255 = white in 8-bit grayscale), and the y-axis represents the frequency (number of pixels) for each intensity level. For example, a dark image will have a histogram with most values concentrated towards the lower end (left side of the graph), while a bright image will have values on the higher end (right side). A low-contrast image will show a narrow histogram around some mid-range values, whereas a high-contrast image will have a wide histogram spread across the range.</p>
+            <p>Histogram equalization is a contrast enhancement technique that spreads out the most frequent intensity values. The goal is to obtain a uniform (flat) histogram, meaning all intensity values are equally likely. This is done by computing the cumulative distribution function (CDF) of the image’s histogram and using it as a mapping function. In effect, histogram equalization redistributes the brightness values so that the output image uses the full range of intensities more evenly.</p>
+            <p>Mathematically, let the image have L discrete intensity levels 0 to L-1 (for 8-bit images, L = 256). Calculate the probability of each intensity as p(i) = (number of pixels with intensity i) / (total pixels). Compute the cumulative sum cdf(i) = ∑<sub>j=0</sub><sup>i</sup> p(j). Then map each original intensity r to a new intensity s = round((L - 1) * cdf(r)). This transforms the histogram to (ideally) a flat distribution. In color images, histogram equalization is often applied on the luminance channel (e.g., Y channel in YUV color space) to avoid color artifacts, or each RGB channel may be equalized independently.</p>
+            <p>In practice, histogram equalization can dramatically improve the visibility of details in images. For example, chest X-ray images, where bones may appear faint, become clearer after equalization. Similarly, underexposed photographs taken in low-light conditions gain contrast, making objects more distinguishable. However, histogram equalization may increase noise in some regions or cause an unnatural look in certain areas, which should be noted when analyzing results.</p>
+        </section>
+
+        <!-- Objective section -->
+        <section id="objective" data-aos="fade-left">
+            <h2>Objective</h2>
+            <ul>
+                <li>Understand what an image histogram is and how to interpret it as a representation of pixel intensity distribution.</li>
+                <li>Learn the algorithmic steps of histogram equalization and how it enhances image contrast.</li>
+                <li>Implement histogram equalization on sample images using the simulation tool and observe the before/after effects.</li>
+                <li>Analyze the results, comparing original and equalized images, and assess the improvement in contrast and detail.</li>
+                <li>Identify real-world scenarios where histogram equalization is beneficial, such as photo editing or medical imaging.</li>
+            </ul>
+        </section>
+<!-- Pretest section -->
+<section id="pretest" data-aos="zoom-in">
+    <h2>Pretest</h2>
+    <p>Before starting the experiment, answer the following questions to check your prior understanding:</p>
+    <ol>
+        <li>
+            <strong>What is an image histogram?</strong> Explain its axes and what information it conveys about an image.
+            <br>
+            <button class="pretest-toggle">🔍 View Answer</button>
+            <div class="pretest-answer" style="display: none; margin-top: 5px;">
+                An image histogram is a graphical representation showing the distribution of pixel intensity values. 
+                The x-axis represents the range of intensity values (0–255 for 8-bit images), and the y-axis shows the number of pixels at each intensity. 
+                It tells us about the contrast, brightness, and intensity distribution of the image.
+            </div>
+        </li>
+
+        <li>
+            <strong>Why might an image need contrast enhancement?</strong> Give an example of an image with low contrast and what that implies about its histogram.
+            <br>
+            <button class="pretest-toggle">🔍 View Answer</button>
+            <div class="pretest-answer" style="display: none; margin-top: 5px;">
+                An image might need contrast enhancement if important details are hidden due to very close intensity values. 
+                A foggy scene is an example: its histogram would be narrow and concentrated around mid-gray levels, lacking dark and bright extremes.
+            </div>
+        </li>
+
+        <li>
+            <strong>What does histogram equalization do to an image?</strong> Describe in a sentence.
+            <br>
+            <button class="pretest-toggle">🔍 View Answer</button>
+            <div class="pretest-answer" style="display: none; margin-top: 5px;">
+                Histogram equalization spreads out the intensity values across the entire range, enhancing the overall contrast of the image.
+            </div>
+        </li>
+
+        <li>
+            <strong>Can histogram equalization be applied to color images directly?</strong> What is a common approach if you want to equalize colors?
+            <br>
+            <button class="pretest-toggle">🔍 View Answer</button>
+            <div class="pretest-answer" style="display: none; margin-top: 5px;">
+                Applying histogram equalization directly to each RGB channel can distort colors. 
+                A common approach is to convert the image to another color space like HSV or YUV, apply equalization to the intensity (V or Y) channel, and then convert back to RGB.
+            </div>
+        </li>
+    </ol>
+    <p>Try to answer these questions in your own words before proceeding to the procedure and simulation.</p>
+</section>
+
+<!-- JavaScript for Pretest Answer Toggle -->
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const pretestToggles = document.querySelectorAll('.pretest-toggle');
+        pretestToggles.forEach(function(toggle) {
+            toggle.addEventListener('click', function() {
+                const answer = this.nextElementSibling;
+                if (answer.style.display === "none" || answer.style.display === "") {
+                    answer.style.display = "block";
+                    this.textContent = "🙈 Hide Answer";
+                } else {
+                    answer.style.display = "none";
+                    this.textContent = "🔍 View Answer";
+                }
+            });
+        });
+    });
+</script>
+
+
+        <!-- Procedure section -->
+        <section id="procedure" data-aos="slide-up">
+            <h2>Procedure</h2>
+            <ol>
+                <li><strong>Image Selection:</strong> Click the 'Upload Image' button in the Simulation section and choose a test image from your computer. You may use grayscale or color images. For demonstration, darker images or images with limited brightness range work well to show the effect.</li>
+                <li><strong>Original Histogram:</strong> Observe the histogram of the original image displayed below the original image. Note if it is skewed (clustered) to one side.</li>
+                <li><strong>Apply Equalization:</strong> Click the 'Equalize Histogram' button to apply the histogram equalization algorithm. The simulation will process the image and display the equalized result alongside the original.</li>
+                <li><strong>Compare Histograms:</strong> Observe the new histogram of the equalized image. It should be more spread out across the intensity range. Compare the shapes of the original and equalized histograms and the corresponding images.</li>
+                <li><strong>Analyze Results:</strong> Compare the contrast and visibility of details between the original and processed image. Note any differences such as improved detail in shadows or highlights.</li>
+                <li><strong>Experiment Further:</strong> Try different images with varying brightness and contrast levels. Observe how histogram equalization affects images with different lighting conditions.</li>
+            </ol>
+        </section>
+
+       <!-- Simulation section -->
+<section id="simulation" data-aos="flip-up">
+    <h2>Simulation</h2>
+    <p>Use the simulation below to upload an image and perform histogram equalization. The original and equalized images, along with their histograms, will be displayed.</p>
+    <div>
+        <label for="upload">Upload Image: </label>
+        <input type="file" id="upload" accept="image/*">
+        <button id="equalizeBtn">Equalize Histogram</button>
+    </div>
+    <div class="sim-container">
+        <div class="canvas-block">
+            <p>Original Image</p>
+            <canvas id="origCanvas"></canvas>
+            <p>Original Histogram</p>
+            <canvas id="origHist" width="256" height="100"></canvas>
+        </div>
+        <div class="canvas-block">
+            <p>Equalized Image</p>
+            <canvas id="equalCanvas"></canvas>
+            <p>Equalized Histogram</p>
+            <canvas id="equalHist" width="256" height="100"></canvas>
+        </div>
+    </div>
+</section>
+
+        <!-- Assignment section -->
+        <section id="assignment" data-aos="zoom-in">
+            <h2>Assignment</h2>
+            <ol>
+                <li>Perform histogram equalization on two different images: one that is very dark (underexposed) and one that is very bright (overexposed). Save and compare the resulting images. Describe in a short paragraph how the equalization affected each image's contrast and detail.</li>
+                <li>Explain why histogram equalization can sometimes lead to an increase in noise or a washed-out look in the output image. What types of images or conditions might make this effect more noticeable?</li>
+                <li><strong>(Advanced)</strong> Write a short pseudocode or outline the steps you would take to apply histogram equalization to a color image (consider whether you would process each channel separately or use another color space).</li>
+            </ol>
+        </section>
+
+        <!-- Posttest section -->
+<section id="posttest" data-aos="slide-up">
+    <h2>Posttest</h2>
+    <p>After completing the lab, answer the following:</p>
+    <ol>
+        <li>
+            <strong>What is the effect of histogram equalization on the histogram of an image?</strong>
+            <br>
+            <button class="answer-toggle">🔍 View Answer</button>
+            <div class="answer" style="display: none;">
+                It redistributes the intensity values so that they are more uniformly spread across the entire range, enhancing the overall contrast of the image.
+            </div>
+        </li>
+        <li>
+            <strong>In which situation is histogram equalization especially useful?</strong> 
+            <br>Give a real example (e.g., a type of photograph or medical image).
+            <br>
+            <button class="answer-toggle">🔍 View Answer</button>
+            <div class="answer" style="display: none;">
+                It is useful when an image has poor contrast, such as underexposed photographs or medical images like X-rays, where important details are hidden due to limited intensity range.
+            </div>
+        </li>
+        <li>
+            <strong>Describe one limitation or potential downside of histogram equalization.</strong>
+            <br>
+            <button class="answer-toggle">🔍 View Answer</button>
+            <div class="answer" style="display: none;">
+                Histogram equalization can amplify noise or create unnatural looking images, especially when the original image already has good contrast or when it contains large uniform areas.
+            </div>
+        </li>
+        <li>
+            <strong>How is the mapping from old intensity values to new ones determined in histogram equalization?</strong>
+            <br>
+            <button class="answer-toggle">🔍 View Answer</button>
+            <div class="answer" style="display: none;">
+                The mapping is determined by the cumulative distribution function (CDF) of the pixel intensities, which is used to assign new intensity values based on their cumulative probability.
+            </div>
+        </li>
+    </ol>
+</section>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const toggles = document.querySelectorAll('.answer-toggle');
+
+        toggles.forEach(toggle => {
+            toggle.addEventListener('click', function () {
+                const answer = this.nextElementSibling;
+                if (answer.style.display === 'none' || answer.style.display === '') {
+                    answer.style.display = 'block';
+                    this.textContent = '🙈 Hide Answer';
+                } else {
+                    answer.style.display = 'none';
+                    this.textContent = '🔍 View Answer';
+                }
+            });
+        });
+    });
+</script>
+
+        <!-- References section -->
+        <section id="references" data-aos="fade-up">
+            <h2>References</h2>
+            <ul>
+                <li>Gonzalez, R.C. and Woods, R.E., <em>Digital Image Processing</em>, 4th Edition, Pearson (2018).</li>
+                <li>Springer, A. (2020). "Introduction to Image Processing" – [Online resource or lecture notes].</li>
+                <li>OpenCV documentation – <em>Histogram Equalization</em> (docs.opencv.org).</li>
+                <li>Szeliski, R., <em>Computer Vision: Algorithms and Applications</em>, Springer (2010).</li>
+            </ul>
+        </section>
+
+        <!-- Feedback section -->
+        <section id="feedback" data-aos="fade-down">
+            <h2>Feedback</h2>
+            <p>Please provide your feedback on this virtual lab:</p>
+            <form class="feedback-form">
+                <label for="fbtext">Your Comments:</label>
+                <textarea id="fbtext" rows="4" placeholder="Type your feedback here..."></textarea>
+                <button type="button">Submit</button>
+            </form>
+        </section>
+    </div>
+
+    <!-- AOS script -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.js"></script>
+    <script>
+        AOS.init({ once: true });
+
+        // Sidebar active link highlighting
+        const sections = document.querySelectorAll('section');
+        const navLinks = document.querySelectorAll('.sidebar ul li a');
+        window.addEventListener('scroll', () => {
+            let current = "";
+            sections.forEach(section => {
+                const sectionTop = section.offsetTop - 100;
+                if (pageYOffset >= sectionTop) {
+                    current = section.getAttribute('id');
+                }
+            });
+            navLinks.forEach(link => {
+                link.classList.remove('active');
+                if (link.getAttribute('href') === "#" + current) {
+                    link.classList.add('active');
+                }
+            });
+        });
+        // Initialize active link on load
+        window.dispatchEvent(new Event('scroll'));
+
+        // Histogram Equalization Simulation
+        const uploadInput = document.getElementById('upload');
+        const equalBtn = document.getElementById('equalizeBtn');
+        const origCanvas = document.getElementById('origCanvas');
+        const equalCanvas = document.getElementById('equalCanvas');
+        const origHistCanvas = document.getElementById('origHist');
+        const equalHistCanvas = document.getElementById('equalHist');
+        let origContext = origCanvas.getContext('2d');
+        let equalContext = equalCanvas.getContext('2d');
+        let origHistCtx = origHistCanvas.getContext('2d');
+        let equalHistCtx = equalHistCanvas.getContext('2d');
+        let imageData = null;
+        let hist = new Array(256);
+        let cdf = new Array(256);
+
+        // Load image
+        uploadInput.addEventListener('change', () => {
+            const file = uploadInput.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const img = new Image();
+                img.src = e.target.result;
+                img.onload = function() {
+                    // Scale image to max width 300
+                    const maxW = 300;
+                    let scale = 1;
+                    if (img.width > maxW) {
+                        scale = maxW / img.width;
+                    }
+                    origCanvas.width = img.width * scale;
+                    origHistCtx.clearRect(0, 0, 256, 100);
+                    origCanvas.height = img.height * scale;
+                    origContext.clearRect(0, 0, origCanvas.width, origCanvas.height);
+                    equalCanvas.width = img.width * scale;
+                    equalContext.clearRect(0, 0, equalCanvas.width, equalCanvas.height);
+                    equalCanvas.height = img.height * scale;
+                    equalHistCtx.clearRect(0, 0, 256, 100);
+
+                    origContext.drawImage(img, 0, 0, origCanvas.width, origCanvas.height);
+                    // Get grayscale image data
+                    let imgData = origContext.getImageData(0, 0, origCanvas.width, origCanvas.height);
+                    let data = imgData.data;
+                    // convert to grayscale
+                    for (let i = 0; i < data.length; i += 4) {
+                        const avg = Math.round(0.299 * data[i] + 0.587 * data[i+1] + 0.114 * data[i+2]);
+                        data[i] = data[i+1] = data[i+2] = avg;
+                    }
+                    origContext.putImageData(imgData, 0, 0);
+                    imageData = imgData;
+                    // Draw original histogram
+                    drawHistogram(origHistCtx, imageData);
+                }
+            }
+            reader.readAsDataURL(file);
+        });
+
+        // Equalize histogram on button click
+        equalBtn.addEventListener('click', () => {
+            if (!imageData) return;
+            let data = imageData.data;
+            const totalPixels = imageData.width * imageData.height;
+            // Compute histogram
+            for (let i = 0; i < 256; i++) {
+                hist[i] = 0;
+                cdf[i] = 0;
+            }
+            for (let i = 0; i < data.length; i += 4) {
+                hist[data[i]]++;
+            }
+            // Compute cumulative distribution
+            cdf[0] = hist[0];
+            for (let i = 1; i < 256; i++) {
+                cdf[i] = cdf[i-1] + hist[i];
+            }
+            // Normalize cdf
+            for (let i = 0; i < 256; i++) {
+                cdf[i] = Math.round((cdf[i] / totalPixels) * 255);
+            }
+            // Apply equalization
+            let eqData = equalContext.createImageData(imageData.width, imageData.height);
+            for (let i = 0; i < data.length; i += 4) {
+                let val = data[i]; // grayscale, so any channel is fine
+                let newVal = cdf[val];
+                eqData.data[i] = eqData.data[i+1] = eqData.data[i+2] = newVal;
+                eqData.data[i+3] = 255;
+            }
+            equalContext.putImageData(eqData, 0, 0);
+            // Draw equalized histogram
+            drawHistogram(equalHistCtx, eqData);
+        });
+
+        // Function to draw histogram given context and imageData
+        function drawHistogram(ctx, imageData) {
+            let histArr = new Array(256).fill(0);
+            let data = imageData.data;
+            // Count frequencies
+            for (let i = 0; i < data.length; i += 4) {
+                histArr[data[i]]++;
+            }
+            // Find max for scaling
+            let maxCount = Math.max(...histArr);
+            // Clear canvas
+            ctx.clearRect(0, 0, 256, 100);
+            // Draw bars
+            for (let i = 0; i < 256; i++) {
+                let val = histArr[i];
+                let barHeight = (val / maxCount) * 100;
+                ctx.fillStyle = '#666';
+                ctx.fillRect(i, 100 - barHeight, 1, barHeight);
+            }
+        }
+    </script>
+    <script>
+    const upload = document.getElementById('upload');
+    const equalizeBtn = document.getElementById('equalizeBtn');
+    const origCanvas = document.getElementById('origCanvas');
+    const equalCanvas = document.getElementById('equalCanvas');
+    const origHist = document.getElementById('origHist');
+    const equalHist = document.getElementById('equalHist');
+
+    let originalImage = new Image();
+
+    upload.addEventListener('change', function (e) {
+        const file = e.target.files[0];
+        const reader = new FileReader();
+        reader.onload = function (event) {
+            originalImage = new Image();
+            originalImage.onload = function () {
+                // Set canvas sizes
+                origCanvas.width = originalImage.width;
+                origCanvas.height = originalImage.height;
+                equalCanvas.width = originalImage.width;
+                equalCanvas.height = originalImage.height;
+
+                // Draw original color image
+                const ctxOrig = origCanvas.getContext('2d');
+                ctxOrig.drawImage(originalImage, 0, 0);
+
+                // Draw original histogram
+                drawHistogram(ctxOrig, origHist);
+            };
+            originalImage.src = event.target.result;
+        };
+        reader.readAsDataURL(file);
+    });
+
+    equalizeBtn.addEventListener('click', function () {
+        if (!originalImage.src) return;
+
+        const ctxOrig = origCanvas.getContext('2d');
+        const ctxEqual = equalCanvas.getContext('2d');
+
+        const imageData = ctxOrig.getImageData(0, 0, origCanvas.width, origCanvas.height);
+        const data = imageData.data;
+
+        // Convert to grayscale
+        let grayData = [];
+        for (let i = 0; i < data.length; i += 4) {
+            const gray = Math.round(0.299 * data[i] + 0.587 * data[i + 1] + 0.114 * data[i + 2]);
+            grayData.push(gray);
+        }
+
+        // Perform histogram equalization
+        const equalizedData = histogramEqualization(grayData);
+
+        // Update the image data
+        for (let i = 0, j = 0; i < data.length; i += 4, j++) {
+            data[i] = data[i + 1] = data[i + 2] = equalizedData[j];
+        }
+
+        ctxEqual.putImageData(imageData, 0, 0);
+
+        // Draw equalized histogram
+        drawHistogram(ctxEqual, equalHist);
+    });
+
+    function histogramEqualization(grayData) {
+        const hist = new Array(256).fill(0);
+        grayData.forEach(val => hist[val]++);
+
+        const total = grayData.length;
+        const cdf = [];
+        let cumulative = 0;
+        for (let i = 0; i < 256; i++) {
+            cumulative += hist[i];
+            cdf[i] = cumulative / total;
+        }
+
+        const equalized = grayData.map(val => Math.round(cdf[val] * 255));
+        return equalized;
+    }
+
+    function drawHistogram(ctx, canvasHist) {
+        const ctxHist = canvasHist.getContext('2d');
+        ctxHist.clearRect(0, 0, canvasHist.width, canvasHist.height);
+
+        const imageData = ctx.getImageData(0, 0, ctx.canvas.width, ctx.canvas.height);
+        const data = imageData.data;
+
+        const grayLevels = new Array(256).fill(0);
+
+        for (let i = 0; i < data.length; i += 4) {
+            const gray = Math.round(0.299 * data[i] + 0.587 * data[i + 1] + 0.114 * data[i + 2]);
+            grayLevels[gray]++;
+        }
+
+        const max = Math.max(...grayLevels);
+        for (let i = 0; i < 256; i++) {
+            const height = (grayLevels[i] / max) * canvasHist.height;
+            ctxHist.fillStyle = '#007bff'; // blue bars
+            ctxHist.fillRect(i, canvasHist.height - height, 1, height);
+        }
+    }
+
+</script>
+
+</body>
+</html>
